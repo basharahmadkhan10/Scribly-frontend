@@ -37,7 +37,7 @@ export default function NotesPage() {
     if (!token) return alert("Please login first");
     // Open backend auth route in new tab
     // NOTE: Ensure this matches your backend URL (localhost:9000)
-    window.open(`https://scribly-backend-new.onrender.com/auth/google?token=${token}`, "_blank");
+    window.open(`https://scribly-backend-new.onrender.com/auth/google/callback?token=${token}`, "_blank");
   };
 
   const fetchNotes = async () => {
@@ -400,5 +400,6 @@ const handleSubmit = async (e) => {
     </div>
   );
 }
+
 
 
