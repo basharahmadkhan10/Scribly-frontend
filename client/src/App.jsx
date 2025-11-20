@@ -67,11 +67,9 @@ function App() {
               <Route
                 path="/notes"
                 element={
-                  <AuthWrapper>
                   <Layout type="protected">
                     <Notes />
                   </Layout>
-                  </AuthWrapper>
                 }
               />
               <Route
