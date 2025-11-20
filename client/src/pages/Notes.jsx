@@ -37,11 +37,7 @@ export default function NotesPage() {
     if (!token) return alert("Please login first");
     // Open backend auth route in new tab
     // NOTE: Ensure this matches your backend URL (localhost:9000)
-    window.open(
-  `https://scribly-backend-new.onrender.com/auth/google?token=${encodeURIComponent(token)}`,
-  "_blank"
-);
-
+    window.open(`https:/auth/google?token=${token}`, "_blank");
   };
 
   const fetchNotes = async () => {
@@ -67,76 +63,56 @@ export default function NotesPage() {
     }));
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  // Basic validation for time
-  if (newNote.startTime && newNote.endTime) {
-    if (new Date(newNote.startTime) >= new Date(newNote.endTime)) {
-      alert("End time must be after start time");
-      return;
+    // Basic Validation for Time
+    if (newNote.startTime && newNote.endTime) {
+      if (new Date(newNote.startTime) >= new Date(newNote.endTime)) {
+        alert("End time must be after start time");
+        return;
+      }
     }
-  }
 
-  // Convert datetime-local to ISO for backend
-  const payload = {
-    ...newNote,
-    startTime: newNote.startTime
-      ? new Date(newNote.startTime).toISOString()
-      : null,
-    endTime: newNote.endTime
-      ? new Date(newNote.endTime).toISOString()
-      : null,
+    // Convert datetime-local to ISO string for backend
+    const payload = {
+      ...newNote,
+      startTime: newNote.startTime
+        ? new Date(newNote.startTime).toISOString()
+        : null,
+      endTime: newNote.endTime ? new Date(newNote.endTime).toISOString() : null,
+    };
+
+    try {
+      if (editingId) {
+        const res = await api.put(`/api/v1/notes/${editingId}`, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const updated = res.data.data.note || res.data.data || res.data;
+        setNotes(
+          notes.map((note) => (note._id === editingId ? updated : note))
+        );
+      } else {
+        const res = await api.post("/api/v1/notes/createnote", payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const createdNote = res.data.data.note || res.data.data || res.data;
+        setNotes([...notes, createdNote]);
+      }
+
+      setNewNote({
+        title: "",
+        content: "",
+        isPublic: false,
+        startTime: "",
+        endTime: "",
+      });
+      setEditingId(null);
+    } catch (err) {
+      console.error("Error submitting note:", err.message);
+      alert("Something went wrong while saving the note.");
+    }
   };
-
-  try {
-    if (editingId) {
-      // ------- UPDATE NOTE -------
-      const res = await api.put(`/api/v1/notes/${editingId}`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const updatedNote = res.data.data?.note;
-
-      if (!updatedNote) {
-        console.error("Invalid update response:", res.data);
-        return;
-      }
-
-      setNotes((prev) =>
-        prev.map((note) => (note._id === editingId ? updatedNote : note))
-      );
-    } else {
-      // ------- CREATE NOTE -------
-      const res = await api.post("/api/v1/notes/createnote", payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const createdNote = res.data.data?.note;
-
-      if (!createdNote) {
-        console.error("Invalid create response:", res.data);
-        return;
-      }
-
-      setNotes((prev) => [...prev, createdNote]);
-    }
-
-    // Reset form after success
-    setNewNote({
-      title: "",
-      content: "",
-      isPublic: false,
-      startTime: "",
-      endTime: "",
-    });
-    setEditingId(null);
-  } catch (err) {
-    console.error("Error submitting note:", err.message);
-    alert("Something went wrong while saving the note.");
-  }
-};
-
 
   const handleEdit = (note) => {
     setNewNote({
@@ -165,13 +141,13 @@ const handleSubmit = async (e) => {
   };
 
   const handleLogout = async () => {
-    localStorage.removeItem("token"); 
     try {
       await api.post(
         "/api/v1/users/logout",
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      localStorage.removeItem("token");
       navigate("/");
     } catch (err) {
       console.error("Logout failed:", err.message);
@@ -404,9 +380,3 @@ const handleSubmit = async (e) => {
     </div>
   );
 }
-
-
-
-
-
-
