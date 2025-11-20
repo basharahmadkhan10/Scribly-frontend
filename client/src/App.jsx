@@ -4,7 +4,7 @@ import { AnimatePresence } from "framer-motion";
 import Layout from "./components/Layout";
 import Preloader from "./components/Preloader";
 import ErrorBoundary from "./components/ErrorBoundary";
-import ProtectedRoute from "./ProtectedRoute.jsx";
+import ProtectedRoute from "./pages/ProtectedRoute";
 
 const pages = {
   Home: lazy(() => import("./pages/Home")),
