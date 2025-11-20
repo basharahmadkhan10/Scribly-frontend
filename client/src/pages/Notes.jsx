@@ -161,13 +161,13 @@ const handleSubmit = async (e) => {
   };
 
   const handleLogout = async () => {
+    localStorage.removeItem("token"); 
     try {
       await api.post(
         "/api/v1/users/logout",
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      localStorage.removeItem("token");
       navigate("/");
     } catch (err) {
       console.error("Logout failed:", err.message);
@@ -400,6 +400,7 @@ const handleSubmit = async (e) => {
     </div>
   );
 }
+
 
 
 
