@@ -4,6 +4,7 @@ import { AnimatePresence } from "framer-motion";
 import Layout from "./components/Layout";
 import Preloader from "./components/Preloader";
 import ErrorBoundary from "./components/ErrorBoundary";
+import Protected from "./pages/ProtectedRoute";
 
 const pages = {
   Home: lazy(() => import("./pages/Home")),
@@ -60,9 +61,11 @@ function App() {
               <Route
                 path="/notes"
                 element={
+                  <Protected>
                   <Layout type="protected">
                     <Notes />
                   </Layout>
+                  </Protected>
                 }
               />
               <Route
